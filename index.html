@@ -64,7 +64,6 @@ header .sous-titre{font-size:1.05em;opacity:.9;margin-top:6px;font-weight:300}
 }
 .hbadge.rouge{background:rgba(239,65,53,.25);border-color:rgba(239,65,53,.5)}
 
-/* Navigation onglets */
 .tabs-nav{
     background:var(--blanc);
     box-shadow:0 4px 15px rgba(0,85,164,.08);
@@ -104,12 +103,10 @@ header .sous-titre{font-size:1.05em;opacity:.9;margin-top:6px;font-weight:300}
     margin:20px 0;
 }
 
-/* Vue tabs */
 .tab-view{display:none}
 .tab-view.active{display:block;animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* Sélecteur commune */
 .selector-card{
     background:var(--blanc);border-radius:14px;padding:25px 30px;
     box-shadow:var(--ombre);margin-bottom:25px;border-top:4px solid var(--bleu-france);
@@ -134,7 +131,6 @@ header .sous-titre{font-size:1.05em;opacity:.9;margin-top:6px;font-weight:300}
     color:var(--blanc);font-weight:700;box-shadow:0 4px 12px rgba(239,65,53,.3);
 }
 
-/* Stats */
 .stats-grid{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
     gap:18px;margin-bottom:25px;
@@ -165,7 +161,6 @@ header .sous-titre{font-size:1.05em;opacity:.9;margin-top:6px;font-weight:300}
 .stat-card .unit{font-size:.8em;font-weight:500;color:var(--gris-clair);margin-left:4px}
 .stat-card .note{font-size:.75em;color:var(--gris-clair);margin-top:6px;position:relative;z-index:1}
 
-/* Charts */
 .charts-grid{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(500px,1fr));
     gap:22px;margin-bottom:25px;
@@ -188,7 +183,6 @@ header .sous-titre{font-size:1.05em;opacity:.9;margin-top:6px;font-weight:300}
 .chart-container{position:relative;height:300px;width:100%}
 .chart-container.tall{height:380px}
 
-/* Insights */
 .insights-section{
     background:var(--blanc);border-radius:14px;padding:30px 35px;
     box-shadow:var(--ombre);margin-bottom:25px;border-left:5px solid var(--rouge-marianne);
@@ -220,7 +214,6 @@ header .sous-titre{font-size:1.05em;opacity:.9;margin-top:6px;font-weight:300}
 .insight-item .highlight{font-weight:800;color:var(--bleu-france)}
 .insight-item.rouge .highlight{color:var(--rouge-marianne)}
 
-/* Tableau */
 .table-section{
     background:var(--blanc);border-radius:14px;padding:24px 28px;
     box-shadow:var(--ombre);margin-bottom:25px;overflow-x:auto;
@@ -252,7 +245,6 @@ tbody tr.top2 td:first-child::before{content:'🥈 ';}
 tbody tr.top3{background:#FFFEF0}
 tbody tr.top3 td:first-child::before{content:'🥉 ';}
 
-/* Boutons */
 .btn{
     display:inline-flex;align-items:center;gap:8px;
     padding:10px 18px;border:none;border-radius:8px;
@@ -265,7 +257,6 @@ tbody tr.top3 td:first-child::before{content:'🥉 ';}
 .btn-reset:hover{background:var(--rouge-fonce);transform:translateY(-2px)}
 .btn-group{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
 
-/* Radar - sélection */
 .radar-selector{
     display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
     gap:8px;margin-bottom:20px;
@@ -283,7 +274,6 @@ tbody tr.top3 td:first-child::before{content:'🥉 ';}
 }
 .commune-check.disabled{opacity:.4;cursor:not-allowed}
 
-/* Carte */
 .map-container{
     position:relative;width:100%;height:600px;
     background:#F0F6FF;border-radius:10px;overflow:hidden;
@@ -383,7 +373,6 @@ footer p{opacity:.85;line-height:1.7}
 </div>
 </header>
 
-<!-- Navigation onglets -->
 <div class="tabs-nav">
     <div class="tabs-container">
         <button class="tab-btn active" data-tab="accueil">
@@ -463,10 +452,10 @@ var COMMUNE_POSITIONS = {
 };
 
 // ============================================================
-// CHARGEMENT
+// CHARGEMENT DU JSON
 // ============================================================
 function loadData() {
-    fetch('data/processed/reunion_24_communes_data_complet.json')
+    fetch('processed/reunion_24_communes_data_complet.json')
         .then(function(response) {
             if (!response.ok) throw new Error('HTTP ' + response.status + ': ' + response.statusText);
             return response.json();
@@ -482,9 +471,8 @@ function loadData() {
                 '<div class="error">' +
                 '<strong>Impossible de charger les donnees</strong><br><br>' +
                 error.message + '<br><br>' +
-                '<strong>Solution :</strong> lancez un serveur local :<br>' +
-                '<code>python3 -m http.server 8009</code><br>' +
-                'Puis ouvrez <a href="http://localhost:8009/">http://localhost:8009/</a>' +
+                '<strong>Fichier attendu :</strong> <code>processed/reunion_24_communes_data_complet.json</code><br><br>' +
+                'Vérifiez que le fichier existe dans le dossier <code>processed/</code> du dépôt.' +
                 '</div>';
         });
 }
@@ -517,20 +505,14 @@ function getLastYearData(commune) {
 // ============================================================
 function switchTab(tabName) {
     currentTab = tabName;
-    
-    // Boutons
     document.querySelectorAll('.tab-btn').forEach(function(btn) {
         btn.classList.toggle('active', btn.dataset.tab === tabName);
     });
-    
-    // Vues
     document.querySelectorAll('.tab-view').forEach(function(view) {
         view.classList.remove('active');
     });
     var activeView = document.getElementById('view-' + tabName);
     if (activeView) activeView.classList.add('active');
-    
-    // Re-render du contenu de l'onglet
     if (tabName === 'accueil') {
         if (selectedCommuneCode && DATA) selectCommune(selectedCommuneCode);
     } else if (tabName === 'comparaison') {
@@ -549,7 +531,6 @@ function renderAll() {
     var container = document.getElementById('mainContainer');
     
     container.innerHTML =
-        // Onglet 1 : Accueil par commune
         '<div class="tab-view active" id="view-accueil">' +
             '<div class="selector-card">' +
                 '<h2>Sélectionnez une commune</h2>' +
@@ -597,7 +578,6 @@ function renderAll() {
             '</div>' +
         '</div>' +
         
-        // Onglet 2 : Comparaison
         '<div class="tab-view" id="view-comparaison">' +
             '<div class="section-card">' +
                 '<h2><span class="icon">🎯</span> Radar comparatif (2-3 communes)</h2>' +
@@ -657,7 +637,6 @@ function renderAll() {
             '</div>' +
         '</div>';
     
-    // Créer les boutons de communes
     var grid = document.getElementById('communeGrid');
     Object.keys(DATA.communes).forEach(function(code) {
         var commune = DATA.communes[code];
@@ -669,15 +648,12 @@ function renderAll() {
         grid.appendChild(btn);
     });
     
-    // Event listeners onglets
     document.querySelectorAll('.tab-btn').forEach(function(btn) {
         btn.addEventListener('click', function() { switchTab(btn.dataset.tab); });
     });
     
-    // Event listener carte
     document.getElementById('mapIndicator').addEventListener('change', renderMap);
     
-    // Initialisation
     selectCommune('97408');
     renderRadarSelector();
     renderMap();
@@ -689,18 +665,14 @@ function renderAll() {
 // ============================================================
 function selectCommune(code) {
     selectedCommuneCode = code;
-    
     var buttons = document.querySelectorAll('.commune-btn');
     for (var i = 0; i < buttons.length; i++) {
         buttons[i].classList.toggle('active', buttons[i].dataset.code === code);
     }
-    
     var commune = DATA.communes[code];
     if (!commune) return;
-    
     document.getElementById('insightCommuneName').textContent = commune.nom;
     document.getElementById('tableCommuneName').textContent = commune.nom;
-    
     renderStats(commune);
     renderCharts(commune);
     renderInsights(commune);
@@ -711,7 +683,6 @@ function renderStats(commune) {
     var grid = document.getElementById('statsGrid');
     var donnees = commune.donnees;
     if (!donnees || donnees.length === 0) { grid.innerHTML = '<div class="error">Aucune donnée</div>'; return; }
-    
     var last = donnees[donnees.length - 1];
     var first = donnees[0];
     var popLast = last.population;
@@ -719,12 +690,10 @@ function renderStats(commune) {
     var depLast = last.depenses_fonctionnement;
     var detteLast = last.dette;
     var epargneLast = last.epargne_brute;
-    
     var tauxEndettement = (detteLast && recLast) ? (detteLast / recLast * 100) : null;
     var evolRec = (first.recettes_fonctionnement && recLast) ? ((recLast / first.recettes_fonctionnement - 1) * 100) : null;
     var evolText = evolRec !== null ? 'Évolution ' + first.annee + '-' + last.annee + ' : ' + (evolRec > 0 ? '+' : '') + formatNumber(evolRec, 1) + '%' : '';
     var detteText = tauxEndettement !== null ? 'Taux : ' + formatNumber(tauxEndettement, 0) + '% des recettes' : '';
-    
     grid.innerHTML =
         '<div class="stat-card"><div class="label">Population (' + last.annee + ')</div>' +
         '<div class="value">' + formatNumber(popLast) + '<span class="unit">hab</span></div>' +
@@ -749,26 +718,21 @@ function destroyCharts() {
 }
 
 function renderCharts(commune) {
-    // Détruire seulement les graphiques de l'accueil
     ['revExp', 'revStructure', 'expStructure', 'invest', 'debt'].forEach(function(k) {
         if (charts[k]) { charts[k].destroy(); delete charts[k]; }
     });
-    
     var donnees = commune.donnees;
     var years = donnees.map(function(d) { return d.annee; });
     var last = donnees[donnees.length - 1];
     
     charts.revExp = new Chart(document.getElementById('chartRevExp'), {
         type: 'line',
-        data: {
-            labels: years,
-            datasets: [
-                { label: 'Recettes', data: donnees.map(function(d) { return d.recettes_fonctionnement ? d.recettes_fonctionnement / 1e6 : null; }),
-                  borderColor: COLORS.bleu, backgroundColor: 'rgba(0,85,164,.08)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
-                { label: 'Dépenses', data: donnees.map(function(d) { return d.depenses_fonctionnement ? d.depenses_fonctionnement / 1e6 : null; }),
-                  borderColor: COLORS.rouge, backgroundColor: 'rgba(239,65,53,.08)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5 }
-            ]
-        },
+        data: { labels: years, datasets: [
+            { label: 'Recettes', data: donnees.map(function(d) { return d.recettes_fonctionnement ? d.recettes_fonctionnement / 1e6 : null; }),
+              borderColor: COLORS.bleu, backgroundColor: 'rgba(0,85,164,.08)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+            { label: 'Dépenses', data: donnees.map(function(d) { return d.depenses_fonctionnement ? d.depenses_fonctionnement / 1e6 : null; }),
+              borderColor: COLORS.rouge, backgroundColor: 'rgba(239,65,53,.08)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5 }
+        ] },
         options: { responsive: true, maintainAspectRatio: false,
             plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 15 } },
                 tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ' : ' + formatNumber(ctx.parsed.y, 2) + ' M' + EURO; } } } },
@@ -779,12 +743,10 @@ function renderCharts(commune) {
     
     charts.revStructure = new Chart(document.getElementById('chartRevStructure'), {
         type: 'doughnut',
-        data: {
-            labels: ['Impôts locaux', 'Dotations État', 'Autres recettes'],
+        data: { labels: ['Impôts locaux', 'Dotations État', 'Autres recettes'],
             datasets: [{ data: [last.impots_locaux || 0, last.dotations_etat || 0,
                 Math.max(0, (last.recettes_fonctionnement || 0) - (last.impots_locaux || 0) - (last.dotations_etat || 0))],
-                backgroundColor: [COLORS.bleu, COLORS.rouge, COLORS.bleuClair], borderWidth: 2, borderColor: COLORS.blanc }]
-        },
+                backgroundColor: [COLORS.bleu, COLORS.rouge, COLORS.bleuClair], borderWidth: 2, borderColor: COLORS.blanc }] },
         options: { responsive: true, maintainAspectRatio: false,
             plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 10 } } },
                 tooltip: { callbacks: { label: function(ctx) {
@@ -797,12 +759,10 @@ function renderCharts(commune) {
     
     charts.expStructure = new Chart(document.getElementById('chartExpStructure'), {
         type: 'doughnut',
-        data: {
-            labels: ['Personnel', 'Achats', 'Charges fin.', 'Autres'],
+        data: { labels: ['Personnel', 'Achats', 'Charges fin.', 'Autres'],
             datasets: [{ data: [last.personnel || 0, last.achats || 0, last.charges_financieres || 0,
                 Math.max(0, (last.depenses_fonctionnement || 0) - (last.personnel || 0) - (last.achats || 0) - (last.charges_financieres || 0))],
-                backgroundColor: [COLORS.bleu, COLORS.rouge, COLORS.orange, COLORS.bleuClair], borderWidth: 2, borderColor: COLORS.blanc }]
-        },
+                backgroundColor: [COLORS.bleu, COLORS.rouge, COLORS.orange, COLORS.bleuClair], borderWidth: 2, borderColor: COLORS.blanc }] },
         options: { responsive: true, maintainAspectRatio: false,
             plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 10 } } },
                 tooltip: { callbacks: { label: function(ctx) {
@@ -815,7 +775,7 @@ function renderCharts(commune) {
     
     charts.invest = new Chart(document.getElementById('chartInvest'), {
         type: 'bar',
-        data: { labels: years, datasets: [{ label: 'Investissement (M' + EURO + ')',
+        data: { labels: years, datasets: [{ label: 'Investissement',
             data: donnees.map(function(d) { return d.investissement ? d.investissement / 1e6 : null; }),
             backgroundColor: COLORS.bleu, borderRadius: 4 }] },
         options: { responsive: true, maintainAspectRatio: false,
@@ -850,7 +810,6 @@ function renderInsights(commune) {
     var grid = document.getElementById('insightsGrid');
     var donnees = commune.donnees;
     if (!donnees || donnees.length < 2) { grid.innerHTML = '<div class="insight-item"><p>Données insuffisantes</p></div>'; return; }
-    
     var first = donnees[0];
     var last = donnees[donnees.length - 1];
     var recLast = last.recettes_fonctionnement;
@@ -858,7 +817,6 @@ function renderInsights(commune) {
     var detteLast = last.dette;
     var epargneLast = last.epargne_brute;
     var investLast = last.investissement;
-    
     var evolRec = (first.recettes_fonctionnement && recLast) ? ((recLast / first.recettes_fonctionnement - 1) * 100) : null;
     var evolDep = (first.depenses_fonctionnement && depLast) ? ((depLast / first.depenses_fonctionnement - 1) * 100) : null;
     var evolDette = (first.dette && detteLast) ? ((detteLast / first.dette - 1) * 100) : null;
@@ -868,11 +826,9 @@ function renderInsights(commune) {
     var recParHab = (recLast && last.population) ? (recLast / last.population) : null;
     var detteParHab = (detteLast && last.population) ? (detteLast / last.population) : null;
     var periode = first.annee + '-' + last.annee;
-    
     var diag1 = (tauxEndettement !== null && tauxEndettement > 100) ? '⚠️ Endettement élevé<br>' : '✅ Endettement maîtrisé<br>';
     var diag2 = (tauxEpargne !== null && tauxEpargne > 15) ? '✅ Bonne épargne<br>' : (tauxEpargne !== null ? '⚠️ Épargne limitée<br>' : '');
     var diag3 = (evolRec !== null && evolDep !== null && evolRec > evolDep) ? '✅ Recettes > dépenses' : (evolRec !== null && evolDep !== null ? '⚠️ Dépenses > recettes' : '');
-    
     grid.innerHTML =
         '<div class="insight-item"><h4>📈 Recettes</h4>' +
         '<p>Entre ' + periode + ' : <span class="highlight">' + (evolRec !== null ? (evolRec > 0 ? '+' : '') + formatNumber(evolRec, 1) + '%' : 'N/D') + '</span><br>' +
@@ -922,15 +878,12 @@ function renderRadarSelector() {
     var container = document.getElementById('radarSelector');
     if (!container) return;
     container.innerHTML = '';
-    
     Object.keys(DATA.communes).forEach(function(code) {
         var commune = DATA.communes[code];
         var selected = radarSelection.indexOf(code) !== -1;
         var disabled = !selected && radarSelection.length >= 3;
-        
         var label = document.createElement('label');
         label.className = 'commune-check' + (selected ? ' selected' : '') + (disabled ? ' disabled' : '');
-        
         var cb = document.createElement('input');
         cb.type = 'checkbox';
         cb.checked = selected;
@@ -943,12 +896,10 @@ function renderRadarSelector() {
             }
             renderRadarSelector();
         });
-        
         label.appendChild(cb);
         label.appendChild(document.createTextNode(' ' + commune.nom));
         container.appendChild(label);
     });
-    
     renderRadarChart();
 }
 
@@ -956,10 +907,8 @@ function renderRadarChart() {
     if (charts.radar) charts.radar.destroy();
     var canvas = document.getElementById('chartRadar');
     if (!canvas || radarSelection.length < 2) return;
-    
     var indicators = ['recettes_fonctionnement', 'depenses_fonctionnement', 'dette', 'epargne_brute', 'investissement', 'personnel'];
     var labels = ['Recettes', 'Dépenses', 'Dette', 'Épargne', 'Investissement', 'Personnel'];
-    
     var maxValues = {};
     indicators.forEach(function(ind) {
         var max = 0;
@@ -969,7 +918,6 @@ function renderRadarChart() {
         });
         maxValues[ind] = max || 1;
     });
-    
     var datasets = radarSelection.map(function(code, i) {
         var commune = DATA.communes[code];
         var last = getLastYearData(commune);
@@ -985,25 +933,19 @@ function renderRadarChart() {
             pointRadius: 5, borderWidth: 2.5
         };
     });
-    
     charts.radar = new Chart(canvas, {
         type: 'radar',
         data: { labels: labels, datasets: datasets },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top', labels: { usePointStyle: true, padding: 20, font: { size: 12 } } },
+        options: { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 20, font: { size: 12 } } },
                 tooltip: { callbacks: { label: function(ctx) {
                     var code = radarSelection[ctx.datasetIndex];
                     var last = getLastYearData(DATA.communes[code]);
                     return ctx.dataset.label + ' : ' + formatMEuro(last[indicators[ctx.dataIndex]]);
-                } } }
-            },
-            scales: {
-                r: { beginAtZero: true, max: 100, ticks: { display: false },
-                    grid: { color: 'rgba(0,85,164,.1)' }, angleLines: { color: 'rgba(0,85,164,.1)' },
-                    pointLabels: { font: { size: 12, weight: '600' }, color: '#0055A4' } }
-            }
+                } } } },
+            scales: { r: { beginAtZero: true, max: 100, ticks: { display: false },
+                grid: { color: 'rgba(0,85,164,.1)' }, angleLines: { color: 'rgba(0,85,164,.1)' },
+                pointLabels: { font: { size: 12, weight: '600' }, color: '#0055A4' } } }
         }
     });
 }
@@ -1016,13 +958,11 @@ function getCommuneValue(code, indicator) {
     if (!commune) return null;
     var last = getLastYearData(commune);
     if (!last) return null;
-    
     if (indicator === 'recettes_par_hab') return (last.recettes_fonctionnement && last.population) ? last.recettes_fonctionnement / last.population : null;
     if (indicator === 'dette_par_hab') return (last.dette && last.population) ? last.dette / last.population : null;
     if (indicator === 'taux_endettement') return (last.dette && last.recettes_fonctionnement) ? (last.dette / last.recettes_fonctionnement * 100) : null;
     return last[indicator] || null;
 }
-
 function getHeatmapColor(value, min, max) {
     if (value === null) return '#E5E7EB';
     if (max === min) return HEATMAP_COLORS[0];
@@ -1030,14 +970,12 @@ function getHeatmapColor(value, min, max) {
     var idx = Math.min(HEATMAP_COLORS.length - 1, Math.floor(ratio * HEATMAP_COLORS.length));
     return HEATMAP_COLORS[idx];
 }
-
 function formatMapValue(value, indicator) {
     if (value === null) return 'N/D';
     if (indicator === 'taux_endettement') return formatNumber(value, 1) + ' %';
     if (indicator === 'recettes_par_hab' || indicator === 'dette_par_hab') return formatEuro(value, 0) + '/hab';
     return formatMEuro(value);
 }
-
 function renderMap() {
     var indicatorEl = document.getElementById('mapIndicator');
     if (!indicatorEl) return;
@@ -1045,7 +983,6 @@ function renderMap() {
     var svg = document.getElementById('mapSvg');
     if (!svg) return;
     svg.innerHTML = '';
-    
     var values = [];
     Object.keys(COMMUNE_POSITIONS).forEach(function(code) {
         var v = getCommuneValue(code, indicator);
@@ -1053,19 +990,16 @@ function renderMap() {
     });
     var min = Math.min.apply(null, values);
     var max = Math.max.apply(null, values);
-    
     var bg = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
     bg.setAttribute('cx', '48'); bg.setAttribute('cy', '40');
     bg.setAttribute('rx', '42'); bg.setAttribute('ry', '38');
     bg.setAttribute('fill', '#F0F6FF'); bg.setAttribute('stroke', '#B8D4EC');
     bg.setAttribute('stroke-width', '0.5');
     svg.appendChild(bg);
-    
     Object.keys(COMMUNE_POSITIONS).forEach(function(code) {
         var pos = COMMUNE_POSITIONS[code];
         var value = getCommuneValue(code, indicator);
         var color = getHeatmapColor(value, min, max);
-        
         var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         circle.setAttribute('cx', pos.x); circle.setAttribute('cy', pos.y); circle.setAttribute('r', '4');
         circle.setAttribute('fill', color); circle.setAttribute('class', 'commune-shape');
@@ -1074,12 +1008,8 @@ function renderMap() {
         circle.addEventListener('mouseenter', showMapTooltip);
         circle.addEventListener('mousemove', moveMapTooltip);
         circle.addEventListener('mouseleave', hideMapTooltip);
-        circle.addEventListener('click', function() {
-            switchTab('accueil');
-            selectCommune(code);
-        });
+        circle.addEventListener('click', function() { switchTab('accueil'); selectCommune(code); });
         svg.appendChild(circle);
-        
         var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         text.setAttribute('x', pos.x); text.setAttribute('y', pos.y + 8);
         text.setAttribute('text-anchor', 'middle'); text.setAttribute('font-size', '2');
@@ -1087,7 +1017,6 @@ function renderMap() {
         text.textContent = pos.name.substring(0, 12);
         svg.appendChild(text);
     });
-    
     var legend = document.getElementById('legendScale');
     if (legend) {
         legend.innerHTML = '';
@@ -1098,7 +1027,6 @@ function renderMap() {
         });
     }
 }
-
 function showMapTooltip(e) {
     var tooltip = document.getElementById('mapTooltip');
     if (!tooltip) return;
@@ -1129,7 +1057,6 @@ function renderComparisonTable() {
     var tbody = document.getElementById('comparisonTableBody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    
     var rows = [];
     Object.keys(DATA.communes).forEach(function(code) {
         var commune = DATA.communes[code];
@@ -1138,14 +1065,11 @@ function renderComparisonTable() {
         var recParHab = (last.recettes_fonctionnement && last.population) ? last.recettes_fonctionnement / last.population : null;
         var detteParHab = (last.dette && last.population) ? last.dette / last.population : null;
         var tauxEndet = (last.dette && last.recettes_fonctionnement) ? (last.dette / last.recettes_fonctionnement * 100) : null;
-        rows.push({
-            code: code, nom: commune.nom, population: last.population,
+        rows.push({ code: code, nom: commune.nom, population: last.population,
             recettes: last.recettes_fonctionnement, depenses: last.depenses_fonctionnement,
             dette: last.dette, epargne: last.epargne_brute, investissement: last.investissement,
-            recettes_hab: recParHab, dette_hab: detteParHab, taux_endettement: tauxEndet
-        });
+            recettes_hab: recParHab, dette_hab: detteParHab, taux_endettement: tauxEndet });
     });
-    
     rows.sort(function(a, b) {
         var va = a[sortColumn], vb = b[sortColumn];
         if (va === null || va === undefined) return 1;
@@ -1153,7 +1077,6 @@ function renderComparisonTable() {
         if (typeof va === 'string') return sortDirection === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
         return sortDirection === 'asc' ? va - vb : vb - va;
     });
-    
     rows.forEach(function(row, i) {
         var tr = document.createElement('tr');
         if (i === 0) tr.className = 'top1';
@@ -1171,13 +1094,9 @@ function renderComparisonTable() {
             '<td>' + formatEuro(row.dette_hab, 0) + '</td>' +
             '<td>' + (row.taux_endettement !== null ? formatNumber(row.taux_endettement, 1) + ' %' : 'N/D') + '</td>';
         tr.style.cursor = 'pointer';
-        tr.addEventListener('click', function() {
-            switchTab('accueil');
-            selectCommune(row.code);
-        });
+        tr.addEventListener('click', function() { switchTab('accueil'); selectCommune(row.code); });
         tbody.appendChild(tr);
     });
-    
     document.querySelectorAll('#comparisonTable th.sortable').forEach(function(th) {
         th.classList.remove('sort-asc', 'sort-desc');
         if (th.getAttribute('data-sort') === sortColumn) {
@@ -1198,7 +1117,6 @@ function renderComparisonTable() {
 function exportCSV() {
     var rows = [];
     rows.push(['Commune', 'Population', 'Recettes (M€)', 'Dépenses (M€)', 'Dette (M€)', 'Épargne brute (M€)', 'Investissement (M€)', 'Recettes/hab (€)', 'Dette/hab (€)', 'Taux endettement (%)']);
-    
     Object.keys(DATA.communes).forEach(function(code) {
         var commune = DATA.communes[code];
         var last = getLastYearData(commune);
@@ -1206,17 +1124,14 @@ function exportCSV() {
         var recParHab = (last.recettes_fonctionnement && last.population) ? (last.recettes_fonctionnement / last.population).toFixed(0) : '';
         var detteParHab = (last.dette && last.population) ? (last.dette / last.population).toFixed(0) : '';
         var tauxEndet = (last.dette && last.recettes_fonctionnement) ? (last.dette / last.recettes_fonctionnement * 100).toFixed(1) : '';
-        rows.push([
-            commune.nom, last.population || '',
+        rows.push([commune.nom, last.population || '',
             last.recettes_fonctionnement ? (last.recettes_fonctionnement / 1e6).toFixed(2) : '',
             last.depenses_fonctionnement ? (last.depenses_fonctionnement / 1e6).toFixed(2) : '',
             last.dette ? (last.dette / 1e6).toFixed(2) : '',
             last.epargne_brute ? (last.epargne_brute / 1e6).toFixed(2) : '',
             last.investissement ? (last.investissement / 1e6).toFixed(2) : '',
-            recParHab, detteParHab, tauxEndet
-        ]);
+            recParHab, detteParHab, tauxEndet]);
     });
-    
     var csv = rows.map(function(row) {
         return row.map(function(cell) {
             var s = String(cell === null || cell === undefined ? '' : cell);
@@ -1226,7 +1141,6 @@ function exportCSV() {
             return s;
         }).join(';');
     }).join('\n');
-    
     var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     var link = document.createElement('a');
     var url = URL.createObjectURL(blob);
