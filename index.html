@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Santé Financière Communale — La Réunion</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+    --bleu-france:#0055A4;
+    --bleu-clair:#3B82C4;
+    --bleu-pale:#E8F0F9;
+    --blanc:#FFFFFF;
+    --blanc-casse:#F8FAFC;
+    --rouge-marianne:#EF4135;
+    --rouge-fonce:#C1272D;
+    --gris-texte:#1F2937;
+    --gris-clair:#6B7280;
+    --ombre:0 4px 20px rgba(0,85,164,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background:var(--blanc-casse);
+    color:var(--gris-texte);
+    line-height:1.5;
+}
+.tricolore-bar{height:6px;display:flex}
+.tricolore-bar span{flex:1}
+.tricolore-bar span:nth-child(1){background:var(--bleu-france)}
+.tricolore-bar span:nth-child(2){background:var(--blanc)}
+.tricolore-bar span:nth-child(3){background:var(--rouge-marianne)}
+
+header{
+    background:linear-gradient(135deg,var(--bleu-france) 0%,#003D7A 100%);
+    color:var(--blanc);
+    padding:35px 40px;
+    position:relative;
+    overflow:hidden;
+}
+header::before{
+    content:'';position:absolute;top:-50%;right:-10%;
+    width:500px;height:500px;background:rgba(239,65,53,.1);border-radius:50%;
+}
+header::after{
+    content:'';position:absolute;bottom:-30%;left:-5%;
+    width:300px;height:300px;background:rgba(255,255,255,.05);border-radius:50%;
+}
+.header-content{max-width:1400px;margin:0 auto;position:relative;z-index:1}
+.header-top{display:flex;align-items:center;gap:15px;margin-bottom:10px}
+.embleme{
+    width:50px;height:50px;background:var(--blanc);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.5em;color:var(--bleu-france);font-weight:700;
+    box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+header h1{font-size:2em;font-weight:700;letter-spacing:-.5px}
+header .sous-titre{font-size:1.05em;opacity:.9;margin-top:6px;font-weight:300}
+.header-badges{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.hbadge{
+    background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+    padding:6px 14px;border-radius:20px;font-size:.8em;font-weight:500;
+    backdrop-filter:blur(10px);
+}
+.hbadge.rouge{background:rgba(239,65,53,.25);border-color:rgba(239,65,53,.5)}
+
+/* Navigation onglets */
+.tabs-nav{
+    background:var(--blanc);
+    box-shadow:0 4px 15px rgba(0,85,164,.08);
+    position:sticky;top:0;z-index:100;
+}
+.tabs-container{
+    max-width:1400px;margin:0 auto;
+    display:flex;gap:0;padding:0 20px;
+}
+.tab-btn{
+    flex:1;max-width:280px;
+    padding:18px 24px;
+    border:none;background:none;
+    font-family:inherit;font-size:1em;font-weight:600;
+    color:var(--gris-clair);cursor:pointer;
+    border-bottom:4px solid transparent;
+    transition:all .2s;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.tab-btn:hover{color:var(--bleu-france);background:var(--bleu-pale)}
+.tab-btn.active{
+    color:var(--bleu-france);
+    border-bottom-color:var(--rouge-marianne);
+    background:var(--bleu-pale);
+}
+.tab-btn .tab-icon{font-size:1.2em}
+
+.container{max-width:1400px;margin:0 auto;padding:25px 20px}
+
+.loading{
+    text-align:center;padding:60px 20px;color:var(--bleu-france);
+    font-size:1.1em;font-weight:500;
+}
+.error{
+    background:#FEE2E2;border-left:5px solid var(--rouge-marianne);
+    padding:20px;border-radius:10px;color:var(--rouge-fonce);
+    margin:20px 0;
+}
+
+/* Vue tabs */
+.tab-view{display:none}
+.tab-view.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Sélecteur commune */
+.selector-card{
+    background:var(--blanc);border-radius:14px;padding:25px 30px;
+    box-shadow:var(--ombre);margin-bottom:25px;border-top:4px solid var(--bleu-france);
+}
+.selector-card h2{
+    font-size:1.05em;color:var(--bleu-france);margin-bottom:16px;
+    font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+}
+.commune-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;
+}
+.commune-btn{
+    padding:10px 12px;border:2px solid #E5E7EB;border-radius:8px;
+    background:var(--blanc);cursor:pointer;font-size:.85em;font-weight:500;
+    color:var(--gris-texte);transition:all .2s;text-align:center;
+}
+.commune-btn:hover{
+    border-color:var(--bleu-france);background:var(--bleu-pale);transform:translateY(-2px);
+}
+.commune-btn.active{
+    border-color:var(--rouge-marianne);background:var(--rouge-marianne);
+    color:var(--blanc);font-weight:700;box-shadow:0 4px 12px rgba(239,65,53,.3);
+}
+
+/* Stats */
+.stats-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:18px;margin-bottom:25px;
+}
+.stat-card{
+    background:var(--blanc);border-radius:14px;padding:22px 24px;
+    box-shadow:var(--ombre);border-left:5px solid var(--bleu-france);
+    transition:transform .2s;position:relative;overflow:hidden;
+}
+.stat-card:hover{transform:translateY(-4px)}
+.stat-card.rouge{border-left-color:var(--rouge-marianne)}
+.stat-card.bleu-clair{border-left-color:var(--bleu-clair)}
+.stat-card::after{
+    content:'';position:absolute;top:0;right:0;width:80px;height:80px;
+    background:var(--bleu-pale);border-radius:0 0 0 80px;opacity:.5;
+}
+.stat-card.rouge::after{background:#FEE2E2}
+.stat-card .label{
+    font-size:.72em;text-transform:uppercase;letter-spacing:.8px;
+    color:var(--gris-clair);font-weight:700;margin-bottom:8px;
+    position:relative;z-index:1;
+}
+.stat-card .value{
+    font-size:1.8em;font-weight:800;color:var(--bleu-france);
+    position:relative;z-index:1;
+}
+.stat-card.rouge .value{color:var(--rouge-marianne)}
+.stat-card .unit{font-size:.8em;font-weight:500;color:var(--gris-clair);margin-left:4px}
+.stat-card .note{font-size:.75em;color:var(--gris-clair);margin-top:6px;position:relative;z-index:1}
+
+/* Charts */
+.charts-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(500px,1fr));
+    gap:22px;margin-bottom:25px;
+}
+.chart-card{
+    background:var(--blanc);border-radius:14px;padding:24px 28px;
+    box-shadow:var(--ombre);border-top:3px solid var(--bleu-france);
+}
+.chart-card.rouge-top{border-top-color:var(--rouge-marianne)}
+.chart-card.full-width{grid-column:1/-1}
+.chart-card h3{
+    font-size:1em;color:var(--bleu-france);margin-bottom:18px;
+    font-weight:700;display:flex;align-items:center;gap:10px;
+}
+.chart-card h3 .icon{
+    width:32px;height:32px;background:var(--bleu-pale);border-radius:8px;
+    display:flex;align-items:center;justify-content:center;font-size:1em;
+}
+.chart-card.rouge-top h3 .icon{background:#FEE2E2}
+.chart-container{position:relative;height:300px;width:100%}
+.chart-container.tall{height:380px}
+
+/* Insights */
+.insights-section{
+    background:var(--blanc);border-radius:14px;padding:30px 35px;
+    box-shadow:var(--ombre);margin-bottom:25px;border-left:5px solid var(--rouge-marianne);
+}
+.insights-section h2{
+    font-size:1.2em;margin-bottom:22px;color:var(--bleu-france);
+    display:flex;align-items:center;gap:12px;font-weight:700;
+}
+.insights-section h2 .icon{
+    width:36px;height:36px;
+    background:linear-gradient(135deg,var(--bleu-france),var(--rouge-marianne));
+    color:var(--blanc);border-radius:10px;display:flex;
+    align-items:center;justify-content:center;font-size:1em;
+}
+.insights-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;
+}
+.insight-item{
+    background:var(--blanc-casse);border-radius:10px;padding:18px 20px;
+    border-left:3px solid var(--bleu-france);
+}
+.insight-item.rouge{border-left-color:var(--rouge-marianne)}
+.insight-item h4{
+    font-size:.85em;color:var(--bleu-france);margin-bottom:8px;
+    font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+}
+.insight-item.rouge h4{color:var(--rouge-marianne)}
+.insight-item p{font-size:.9em;color:var(--gris-texte);line-height:1.6}
+.insight-item .highlight{font-weight:800;color:var(--bleu-france)}
+.insight-item.rouge .highlight{color:var(--rouge-marianne)}
+
+/* Tableau */
+.table-section{
+    background:var(--blanc);border-radius:14px;padding:24px 28px;
+    box-shadow:var(--ombre);margin-bottom:25px;overflow-x:auto;
+}
+.table-section h3{font-size:1em;color:var(--bleu-france);margin-bottom:16px;font-weight:700}
+.table-section.rouge-top{border-top:4px solid var(--rouge-marianne)}
+.table-section h2{
+    font-size:1.15em;color:var(--bleu-france);margin-bottom:18px;
+    font-weight:700;display:flex;align-items:center;gap:10px;
+}
+table{width:100%;border-collapse:collapse;font-size:.85em}
+thead{background:var(--bleu-france);color:var(--blanc)}
+th{
+    padding:12px 14px;text-align:left;font-weight:600;white-space:nowrap;
+    font-size:.8em;text-transform:uppercase;letter-spacing:.5px;
+}
+th.sortable{cursor:pointer;user-select:none;position:relative}
+th.sortable:hover{background:#003D7A}
+th.sortable::after{content:'';margin-left:6px;font-size:.7em;opacity:.5}
+th.sort-asc::after{content:'▲';opacity:1}
+th.sort-desc::after{content:'▼';opacity:1}
+td{padding:10px 14px;border-bottom:1px solid #E5E7EB}
+tbody tr:hover{background:var(--bleu-pale)}
+tbody tr:nth-child(even){background:#FBFCFE}
+tbody tr.top1{background:#FFF5F5;font-weight:600}
+tbody tr.top1 td:first-child::before{content:'🥇 ';}
+tbody tr.top2{background:#F0F8FF}
+tbody tr.top2 td:first-child::before{content:'🥈 ';}
+tbody tr.top3{background:#FFFEF0}
+tbody tr.top3 td:first-child::before{content:'🥉 ';}
+
+/* Boutons */
+.btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:10px 18px;border:none;border-radius:8px;
+    font-size:.9em;font-weight:600;cursor:pointer;
+    font-family:inherit;transition:all .2s;
+}
+.btn-export{background:var(--bleu-france);color:var(--blanc)}
+.btn-export:hover{background:#003D7A;transform:translateY(-2px)}
+.btn-reset{background:var(--rouge-marianne);color:var(--blanc)}
+.btn-reset:hover{background:var(--rouge-fonce);transform:translateY(-2px)}
+.btn-group{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+
+/* Radar - sélection */
+.radar-selector{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+    gap:8px;margin-bottom:20px;
+}
+.commune-check{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 12px;border:2px solid #E5E7EB;border-radius:8px;
+    background:var(--blanc);cursor:pointer;font-size:.85em;
+    transition:all .2s;user-select:none;
+}
+.commune-check:hover{border-color:var(--bleu-france);background:var(--bleu-pale)}
+.commune-check input{accent-color:var(--rouge-marianne);cursor:pointer}
+.commune-check.selected{
+    border-color:var(--rouge-marianne);background:#FEE2E2;font-weight:600;
+}
+.commune-check.disabled{opacity:.4;cursor:not-allowed}
+
+/* Carte */
+.map-container{
+    position:relative;width:100%;height:600px;
+    background:#F0F6FF;border-radius:10px;overflow:hidden;
+}
+.map-svg{width:100%;height:100%}
+.commune-shape{cursor:pointer;transition:all .2s;stroke:#FFF;stroke-width:1.5}
+.commune-shape:hover{stroke:var(--rouge-marianne);stroke-width:3;filter:brightness(1.1)}
+.map-tooltip{
+    position:absolute;background:var(--bleu-france);color:#FFF;
+    padding:10px 14px;border-radius:8px;font-size:.85em;
+    pointer-events:none;opacity:0;transition:opacity .15s;
+    box-shadow:0 4px 15px rgba(0,0,0,.2);z-index:10;white-space:nowrap;
+}
+.map-tooltip.visible{opacity:1}
+.map-legend{
+    display:flex;align-items:center;gap:10px;margin-top:15px;
+    font-size:.85em;justify-content:center;flex-wrap:wrap;
+}
+.legend-scale{
+    display:flex;height:20px;border-radius:4px;overflow:hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+.legend-scale span{width:40px;height:100%}
+
+.indicator-select{
+    padding:10px 14px;border:2px solid var(--bleu-france);border-radius:8px;
+    font-size:.9em;font-weight:500;color:var(--bleu-france);
+    background:var(--blanc);cursor:pointer;margin-bottom:20px;
+    font-family:inherit;
+}
+.indicator-select:focus{outline:none;box-shadow:0 0 0 3px rgba(0,85,164,.15)}
+
+.section-card{
+    background:var(--blanc);border-radius:14px;padding:25px 30px;
+    box-shadow:var(--ombre);margin-bottom:25px;
+    border-top:4px solid var(--bleu-france);
+}
+.section-card h2{
+    font-size:1.15em;color:var(--bleu-france);margin-bottom:20px;
+    font-weight:700;display:flex;align-items:center;gap:10px;
+}
+.section-card h2 .icon{
+    width:36px;height:36px;background:var(--bleu-pale);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;font-size:1em;
+}
+.section-card h2 .icon.rouge{background:#FEE2E2}
+
+footer{
+    background:var(--bleu-france);color:var(--blanc);padding:25px 40px;
+    text-align:center;font-size:.85em;margin-top:20px;
+}
+footer .footer-tricolore{display:flex;justify-content:center;gap:0;margin-bottom:15px}
+footer .footer-tricolore span{width:40px;height:4px}
+footer .footer-tricolore span:nth-child(1){background:var(--blanc)}
+footer .footer-tricolore span:nth-child(2){background:var(--rouge-marianne)}
+footer .footer-tricolore span:nth-child(3){background:var(--blanc)}
+footer p{opacity:.85;line-height:1.7}
+
+@media(max-width:768px){
+    header h1{font-size:1.4em}
+    .charts-grid{grid-template-columns:1fr}
+    .commune-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+    .stats-grid{grid-template-columns:repeat(2,1fr)}
+    .chart-container{height:220px}
+    .chart-container.tall{height:320px}
+    .map-container{height:400px}
+    .container{padding:15px}
+    .tab-btn{padding:14px 10px;font-size:.85em;flex-direction:column;gap:4px}
+}
+@media(max-width:480px){
+    .stats-grid{grid-template-columns:1fr}
+    header{padding:25px 20px}
+    header h1{font-size:1.15em}
+    .selector-card{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<div class="tricolore-bar"><span></span><span></span><span></span></div>
+
+<header>
+<div class="header-content">
+    <div class="header-top">
+        <div class="embleme">RF</div>
+        <div>
+            <h1>Santé Financière Communale</h1>
+            <div class="sous-titre">Comptes des 24 communes de La Réunion — Données DGFiP + OFGL (2000-2025)</div>
+        </div>
+    </div>
+    <div class="header-badges">
+        <span class="hbadge">24 communes</span>
+        <span class="hbadge">2000-2025</span>
+        <span class="hbadge rouge">Données officielles</span>
+        <span class="hbadge">La Réunion (974)</span>
+    </div>
+</div>
+</header>
+
+<!-- Navigation onglets -->
+<div class="tabs-nav">
+    <div class="tabs-container">
+        <button class="tab-btn active" data-tab="accueil">
+            <span class="tab-icon">🏛️</span>
+            <span>Accueil par commune</span>
+        </button>
+        <button class="tab-btn" data-tab="comparaison">
+            <span class="tab-icon">📊</span>
+            <span>Comparaison</span>
+        </button>
+    </div>
+</div>
+
+<div class="container" id="mainContainer">
+    <div class="loading">Chargement des données...</div>
+</div>
+
+<footer>
+    <div class="footer-tricolore"><span></span><span></span><span></span></div>
+    <p><strong>Santé Financière Communale — La Réunion</strong><br>
+    Sources : DGFiP (miroir cquest 2000-2018) + OFGL (2018-2025)<br>
+    © 2025 — République Française</p>
+</footer>
+
+<script>
+// ============================================================
+// ÉTAT GLOBAL
+// ============================================================
+var DATA = null;
+var charts = {};
+var EURO = '\u20AC';
+var currentTab = 'accueil';
+var selectedCommuneCode = '97408';
+var radarSelection = ['97408', '97411'];
+var sortColumn = 'recettes';
+var sortDirection = 'desc';
+
+var COLORS = {
+    bleu: '#0055A4', bleuClair: '#3B82C4', bleuPale: '#E8F0F9',
+    rouge: '#EF4135', rougeFonce: '#C1272D', blanc: '#FFFFFF',
+    vert: '#2A9D8F', orange: '#F9A602', violet: '#6A0572', gris: '#6B7280'
+};
+
+var RADAR_COLORS = [
+    { border: '#0055A4', bg: 'rgba(0,85,164,.2)' },
+    { border: '#EF4135', bg: 'rgba(239,65,53,.2)' },
+    { border: '#2A9D8F', bg: 'rgba(42,157,143,.2)' }
+];
+
+var HEATMAP_COLORS = ['#E8F0F9', '#B8D4EC', '#88B8DF', '#589CD2', '#3B82C4', '#1E5F9E', '#0A3D70', '#7B1E1E', '#C1272D', '#EF4135'];
+
+var COMMUNE_POSITIONS = {
+    "97401": { x: 20, y: 30, name: "Les Avirons" },
+    "97402": { x: 62, y: 12, name: "Bras-Panon" },
+    "97403": { x: 38, y: 38, name: "Entre-Deux" },
+    "97404": { x: 18, y: 42, name: "L'Étang-Salé" },
+    "97405": { x: 30, y: 58, name: "Petite-Île" },
+    "97406": { x: 68, y: 20, name: "La Plaine-des-Palmistes" },
+    "97407": { x: 28, y: 22, name: "Le Port" },
+    "97408": { x: 32, y: 25, name: "La Possession" },
+    "97409": { x: 72, y: 18, name: "Saint-André" },
+    "97410": { x: 68, y: 28, name: "Saint-Benoît" },
+    "97411": { x: 38, y: 15, name: "Saint-Denis" },
+    "97412": { x: 40, y: 62, name: "Saint-Joseph" },
+    "97413": { x: 22, y: 38, name: "Saint-Leu" },
+    "97414": { x: 30, y: 50, name: "Saint-Louis" },
+    "97415": { x: 25, y: 28, name: "Saint-Paul" },
+    "97416": { x: 38, y: 55, name: "Saint-Pierre" },
+    "97417": { x: 55, y: 68, name: "Saint-Philippe" },
+    "97418": { x: 45, y: 12, name: "Sainte-Marie" },
+    "97419": { x: 78, y: 25, name: "Sainte-Rose" },
+    "97420": { x: 58, y: 12, name: "Sainte-Suzanne" },
+    "97421": { x: 60, y: 22, name: "Salazie" },
+    "97422": { x: 42, y: 48, name: "Le Tampon" },
+    "97423": { x: 15, y: 35, name: "Les Trois-Bassins" },
+    "97424": { x: 48, y: 32, name: "Cilaos" }
+};
+
+// ============================================================
+// CHARGEMENT
+// ============================================================
+function loadData() {
+    fetch('data/processed/reunion_24_communes_data_complet.json')
+        .then(function(response) {
+            if (!response.ok) throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+            return response.json();
+        })
+        .then(function(data) {
+            DATA = data;
+            console.log('Donnees chargees:', DATA.meta);
+            renderAll();
+        })
+        .catch(function(error) {
+            console.error('Erreur:', error);
+            document.getElementById('mainContainer').innerHTML =
+                '<div class="error">' +
+                '<strong>Impossible de charger les donnees</strong><br><br>' +
+                error.message + '<br><br>' +
+                '<strong>Solution :</strong> lancez un serveur local :<br>' +
+                '<code>python3 -m http.server 8009</code><br>' +
+                'Puis ouvrez <a href="http://localhost:8009/">http://localhost:8009/</a>' +
+                '</div>';
+        });
+}
+
+// ============================================================
+// FORMATAGE
+// ============================================================
+function formatNumber(v, decimals) {
+    if (decimals === undefined) decimals = 0;
+    if (v === null || v === undefined) return 'N/D';
+    return v.toLocaleString('fr-FR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+function formatEuro(v, decimals) {
+    if (decimals === undefined) decimals = 0;
+    if (v === null || v === undefined) return 'N/D';
+    return formatNumber(v, decimals) + ' ' + EURO;
+}
+function formatMEuro(v, decimals) {
+    if (decimals === undefined) decimals = 2;
+    if (v === null || v === undefined) return 'N/D';
+    return formatNumber(v / 1e6, decimals) + ' M' + EURO;
+}
+function getLastYearData(commune) {
+    if (!commune.donnees || commune.donnees.length === 0) return null;
+    return commune.donnees[commune.donnees.length - 1];
+}
+
+// ============================================================
+// GESTION DES ONGLETS
+// ============================================================
+function switchTab(tabName) {
+    currentTab = tabName;
+    
+    // Boutons
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+    
+    // Vues
+    document.querySelectorAll('.tab-view').forEach(function(view) {
+        view.classList.remove('active');
+    });
+    var activeView = document.getElementById('view-' + tabName);
+    if (activeView) activeView.classList.add('active');
+    
+    // Re-render du contenu de l'onglet
+    if (tabName === 'accueil') {
+        if (selectedCommuneCode && DATA) selectCommune(selectedCommuneCode);
+    } else if (tabName === 'comparaison') {
+        if (DATA) {
+            renderRadarSelector();
+            renderMap();
+            renderComparisonTable();
+        }
+    }
+}
+
+// ============================================================
+// RENDU GLOBAL
+// ============================================================
+function renderAll() {
+    var container = document.getElementById('mainContainer');
+    
+    container.innerHTML =
+        // Onglet 1 : Accueil par commune
+        '<div class="tab-view active" id="view-accueil">' +
+            '<div class="selector-card">' +
+                '<h2>Sélectionnez une commune</h2>' +
+                '<div class="commune-grid" id="communeGrid"></div>' +
+            '</div>' +
+            '<div class="stats-grid" id="statsGrid"></div>' +
+            '<div class="charts-grid">' +
+                '<div class="chart-card full-width">' +
+                    '<h3><span class="icon">📈</span> Évolution des recettes et dépenses (M' + EURO + ')</h3>' +
+                    '<div class="chart-container tall"><canvas id="chartRevExp"></canvas></div>' +
+                '</div>' +
+                '<div class="chart-card">' +
+                    '<h3><span class="icon">📊</span> Structure des recettes (dernière année)</h3>' +
+                    '<div class="chart-container"><canvas id="chartRevStructure"></canvas></div>' +
+                '</div>' +
+                '<div class="chart-card rouge-top">' +
+                    '<h3><span class="icon">📊</span> Structure des dépenses (dernière année)</h3>' +
+                    '<div class="chart-container"><canvas id="chartExpStructure"></canvas></div>' +
+                '</div>' +
+                '<div class="chart-card">' +
+                    '<h3><span class="icon">🏗️</span> Investissement annuel</h3>' +
+                    '<div class="chart-container"><canvas id="chartInvest"></canvas></div>' +
+                '</div>' +
+                '<div class="chart-card rouge-top">' +
+                    '<h3><span class="icon">💰</span> Dette et épargne</h3>' +
+                    '<div class="chart-container"><canvas id="chartDebt"></canvas></div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="insights-section">' +
+                '<h2><span class="icon">💡</span> Analyse financière — <span id="insightCommuneName">—</span></h2>' +
+                '<div class="insights-grid" id="insightsGrid"></div>' +
+            '</div>' +
+            '<div class="table-section">' +
+                '<h3>Données détaillées — <span id="tableCommuneName">—</span></h3>' +
+                '<div style="overflow-x:auto">' +
+                    '<table>' +
+                        '<thead><tr>' +
+                            '<th>Année</th><th>Population</th><th>Recettes</th>' +
+                            '<th>Dépenses</th><th>Épargne brute</th>' +
+                            '<th>Investissement</th><th>Dette</th>' +
+                        '</tr></thead>' +
+                        '<tbody id="dataTableBody"></tbody>' +
+                    '</table>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+        
+        // Onglet 2 : Comparaison
+        '<div class="tab-view" id="view-comparaison">' +
+            '<div class="section-card">' +
+                '<h2><span class="icon">🎯</span> Radar comparatif (2-3 communes)</h2>' +
+                '<div style="margin-bottom:15px;font-size:.9em;color:#6B7280;">' +
+                    'Sélectionnez 2 ou 3 communes pour comparer leur profil financier.' +
+                '</div>' +
+                '<div class="radar-selector" id="radarSelector"></div>' +
+                '<div class="chart-container tall"><canvas id="chartRadar"></canvas></div>' +
+            '</div>' +
+            
+            '<div class="section-card">' +
+                '<h2><span class="icon rouge">🗺️</span> Carte de La Réunion</h2>' +
+                '<select class="indicator-select" id="mapIndicator">' +
+                    '<option value="recettes_fonctionnement">Recettes de fonctionnement</option>' +
+                    '<option value="depenses_fonctionnement">Dépenses de fonctionnement</option>' +
+                    '<option value="dette">Encours de dette</option>' +
+                    '<option value="epargne_brute">Épargne brute</option>' +
+                    '<option value="investissement">Investissement</option>' +
+                    '<option value="recettes_par_hab">Recettes par habitant</option>' +
+                    '<option value="dette_par_hab">Dette par habitant</option>' +
+                    '<option value="taux_endettement">Taux d\'endettement (%)</option>' +
+                '</select>' +
+                '<div class="map-container" id="mapContainer">' +
+                    '<svg class="map-svg" id="mapSvg" viewBox="0 0 100 80" preserveAspectRatio="xMidYMid meet"></svg>' +
+                    '<div class="map-tooltip" id="mapTooltip"></div>' +
+                '</div>' +
+                '<div class="map-legend">' +
+                    '<span>Faible</span>' +
+                    '<div class="legend-scale" id="legendScale"></div>' +
+                    '<span>Élevé</span>' +
+                '</div>' +
+            '</div>' +
+            
+            '<div class="table-section rouge-top">' +
+                '<h2><span class="icon">📊</span> Tableau comparatif — 2025</h2>' +
+                '<div class="btn-group">' +
+                    '<button class="btn btn-export" onclick="exportCSV()">📥 Exporter en CSV</button>' +
+                    '<button class="btn btn-reset" onclick="renderComparisonTable()">🔄 Réinitialiser le tri</button>' +
+                '</div>' +
+                '<div style="overflow-x:auto">' +
+                    '<table id="comparisonTable">' +
+                        '<thead><tr>' +
+                            '<th class="sortable" data-sort="nom">Commune</th>' +
+                            '<th class="sortable" data-sort="population">Population</th>' +
+                            '<th class="sortable" data-sort="recettes">Recettes</th>' +
+                            '<th class="sortable" data-sort="depenses">Dépenses</th>' +
+                            '<th class="sortable" data-sort="dette">Dette</th>' +
+                            '<th class="sortable" data-sort="epargne">Épargne brute</th>' +
+                            '<th class="sortable" data-sort="investissement">Investissement</th>' +
+                            '<th class="sortable" data-sort="recettes_hab">Recettes/hab</th>' +
+                            '<th class="sortable" data-sort="dette_hab">Dette/hab</th>' +
+                            '<th class="sortable" data-sort="taux_endettement">Taux endett.</th>' +
+                        '</tr></thead>' +
+                        '<tbody id="comparisonTableBody"></tbody>' +
+                    '</table>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    
+    // Créer les boutons de communes
+    var grid = document.getElementById('communeGrid');
+    Object.keys(DATA.communes).forEach(function(code) {
+        var commune = DATA.communes[code];
+        var btn = document.createElement('button');
+        btn.className = 'commune-btn';
+        btn.textContent = commune.nom;
+        btn.dataset.code = code;
+        btn.addEventListener('click', function() { selectCommune(code); });
+        grid.appendChild(btn);
+    });
+    
+    // Event listeners onglets
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { switchTab(btn.dataset.tab); });
+    });
+    
+    // Event listener carte
+    document.getElementById('mapIndicator').addEventListener('change', renderMap);
+    
+    // Initialisation
+    selectCommune('97408');
+    renderRadarSelector();
+    renderMap();
+    renderComparisonTable();
+}
+
+// ============================================================
+// ACCUEIL - SÉLECTION COMMUNE
+// ============================================================
+function selectCommune(code) {
+    selectedCommuneCode = code;
+    
+    var buttons = document.querySelectorAll('.commune-btn');
+    for (var i = 0; i < buttons.length; i++) {
+        buttons[i].classList.toggle('active', buttons[i].dataset.code === code);
+    }
+    
+    var commune = DATA.communes[code];
+    if (!commune) return;
+    
+    document.getElementById('insightCommuneName').textContent = commune.nom;
+    document.getElementById('tableCommuneName').textContent = commune.nom;
+    
+    renderStats(commune);
+    renderCharts(commune);
+    renderInsights(commune);
+    renderTable(commune);
+}
+
+function renderStats(commune) {
+    var grid = document.getElementById('statsGrid');
+    var donnees = commune.donnees;
+    if (!donnees || donnees.length === 0) { grid.innerHTML = '<div class="error">Aucune donnée</div>'; return; }
+    
+    var last = donnees[donnees.length - 1];
+    var first = donnees[0];
+    var popLast = last.population;
+    var recLast = last.recettes_fonctionnement;
+    var depLast = last.depenses_fonctionnement;
+    var detteLast = last.dette;
+    var epargneLast = last.epargne_brute;
+    
+    var tauxEndettement = (detteLast && recLast) ? (detteLast / recLast * 100) : null;
+    var evolRec = (first.recettes_fonctionnement && recLast) ? ((recLast / first.recettes_fonctionnement - 1) * 100) : null;
+    var evolText = evolRec !== null ? 'Évolution ' + first.annee + '-' + last.annee + ' : ' + (evolRec > 0 ? '+' : '') + formatNumber(evolRec, 1) + '%' : '';
+    var detteText = tauxEndettement !== null ? 'Taux : ' + formatNumber(tauxEndettement, 0) + '% des recettes' : '';
+    
+    grid.innerHTML =
+        '<div class="stat-card"><div class="label">Population (' + last.annee + ')</div>' +
+        '<div class="value">' + formatNumber(popLast) + '<span class="unit">hab</span></div>' +
+        '<div class="note">Source DGFiP/OFGL</div></div>' +
+        '<div class="stat-card"><div class="label">Recettes (' + last.annee + ')</div>' +
+        '<div class="value">' + formatNumber(recLast / 1e6, 2) + '<span class="unit">M' + EURO + '</span></div>' +
+        '<div class="note">' + evolText + '</div></div>' +
+        '<div class="stat-card bleu-clair"><div class="label">Dépenses (' + last.annee + ')</div>' +
+        '<div class="value">' + formatNumber(depLast / 1e6, 2) + '<span class="unit">M' + EURO + '</span></div>' +
+        '<div class="note">Charges totales</div></div>' +
+        '<div class="stat-card rouge"><div class="label">Dette (' + last.annee + ')</div>' +
+        '<div class="value">' + formatNumber(detteLast / 1e6, 2) + '<span class="unit">M' + EURO + '</span></div>' +
+        '<div class="note">' + detteText + '</div></div>' +
+        '<div class="stat-card rouge"><div class="label">Épargne brute (' + last.annee + ')</div>' +
+        '<div class="value">' + formatNumber(epargneLast / 1e6, 2) + '<span class="unit">M' + EURO + '</span></div>' +
+        '<div class="note">Excédent brut</div></div>';
+}
+
+function destroyCharts() {
+    Object.keys(charts).forEach(function(k) { if (charts[k]) charts[k].destroy(); });
+    charts = {};
+}
+
+function renderCharts(commune) {
+    // Détruire seulement les graphiques de l'accueil
+    ['revExp', 'revStructure', 'expStructure', 'invest', 'debt'].forEach(function(k) {
+        if (charts[k]) { charts[k].destroy(); delete charts[k]; }
+    });
+    
+    var donnees = commune.donnees;
+    var years = donnees.map(function(d) { return d.annee; });
+    var last = donnees[donnees.length - 1];
+    
+    charts.revExp = new Chart(document.getElementById('chartRevExp'), {
+        type: 'line',
+        data: {
+            labels: years,
+            datasets: [
+                { label: 'Recettes', data: donnees.map(function(d) { return d.recettes_fonctionnement ? d.recettes_fonctionnement / 1e6 : null; }),
+                  borderColor: COLORS.bleu, backgroundColor: 'rgba(0,85,164,.08)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+                { label: 'Dépenses', data: donnees.map(function(d) { return d.depenses_fonctionnement ? d.depenses_fonctionnement / 1e6 : null; }),
+                  borderColor: COLORS.rouge, backgroundColor: 'rgba(239,65,53,.08)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 15 } },
+                tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ' : ' + formatNumber(ctx.parsed.y, 2) + ' M' + EURO; } } } },
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'M' + EURO }, grid: { color: 'rgba(0,85,164,.05)' } }, x: { grid: { display: false } } },
+            interaction: { intersect: false, mode: 'index' }
+        }
+    });
+    
+    charts.revStructure = new Chart(document.getElementById('chartRevStructure'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Impôts locaux', 'Dotations État', 'Autres recettes'],
+            datasets: [{ data: [last.impots_locaux || 0, last.dotations_etat || 0,
+                Math.max(0, (last.recettes_fonctionnement || 0) - (last.impots_locaux || 0) - (last.dotations_etat || 0))],
+                backgroundColor: [COLORS.bleu, COLORS.rouge, COLORS.bleuClair], borderWidth: 2, borderColor: COLORS.blanc }]
+        },
+        options: { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 10 } } },
+                tooltip: { callbacks: { label: function(ctx) {
+                    var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                    var pct = total > 0 ? (ctx.parsed / total * 100) : 0;
+                    return ctx.label + ' : ' + formatNumber(ctx.parsed / 1e6, 2) + ' M' + EURO + ' (' + formatNumber(pct, 1) + '%)';
+                } } } }
+        }
+    });
+    
+    charts.expStructure = new Chart(document.getElementById('chartExpStructure'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Personnel', 'Achats', 'Charges fin.', 'Autres'],
+            datasets: [{ data: [last.personnel || 0, last.achats || 0, last.charges_financieres || 0,
+                Math.max(0, (last.depenses_fonctionnement || 0) - (last.personnel || 0) - (last.achats || 0) - (last.charges_financieres || 0))],
+                backgroundColor: [COLORS.bleu, COLORS.rouge, COLORS.orange, COLORS.bleuClair], borderWidth: 2, borderColor: COLORS.blanc }]
+        },
+        options: { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 10 } } },
+                tooltip: { callbacks: { label: function(ctx) {
+                    var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                    var pct = total > 0 ? (ctx.parsed / total * 100) : 0;
+                    return ctx.label + ' : ' + formatNumber(ctx.parsed / 1e6, 2) + ' M' + EURO + ' (' + formatNumber(pct, 1) + '%)';
+                } } } }
+        }
+    });
+    
+    charts.invest = new Chart(document.getElementById('chartInvest'), {
+        type: 'bar',
+        data: { labels: years, datasets: [{ label: 'Investissement (M' + EURO + ')',
+            data: donnees.map(function(d) { return d.investissement ? d.investissement / 1e6 : null; }),
+            backgroundColor: COLORS.bleu, borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false },
+                tooltip: { callbacks: { label: function(ctx) { return formatNumber(ctx.parsed.y, 2) + ' M' + EURO; } } } },
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'M' + EURO }, grid: { color: 'rgba(0,85,164,.05)' } }, x: { grid: { display: false } } }
+        }
+    });
+    
+    charts.debt = new Chart(document.getElementById('chartDebt'), {
+        type: 'line',
+        data: { labels: years, datasets: [
+            { label: 'Dette (M' + EURO + ')', data: donnees.map(function(d) { return d.dette ? d.dette / 1e6 : null; }),
+              borderColor: COLORS.rouge, backgroundColor: 'rgba(239,65,53,.1)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5, yAxisID: 'y' },
+            { label: 'Épargne brute (M' + EURO + ')', data: donnees.map(function(d) { return d.epargne_brute ? d.epargne_brute / 1e6 : null; }),
+              borderColor: COLORS.bleu, backgroundColor: 'rgba(0,85,164,.1)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5, yAxisID: 'y1' }
+        ] },
+        options: { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 15 } },
+                tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ' : ' + formatNumber(ctx.parsed.y, 2) + ' M' + EURO; } } } },
+            scales: {
+                y: { position: 'left', beginAtZero: true, title: { display: true, text: 'Dette (M' + EURO + ')' }, grid: { color: 'rgba(0,85,164,.05)' } },
+                y1: { position: 'right', beginAtZero: true, title: { display: true, text: 'Épargne (M' + EURO + ')' }, grid: { display: false } },
+                x: { grid: { display: false } }
+            },
+            interaction: { intersect: false, mode: 'index' }
+        }
+    });
+}
+
+function renderInsights(commune) {
+    var grid = document.getElementById('insightsGrid');
+    var donnees = commune.donnees;
+    if (!donnees || donnees.length < 2) { grid.innerHTML = '<div class="insight-item"><p>Données insuffisantes</p></div>'; return; }
+    
+    var first = donnees[0];
+    var last = donnees[donnees.length - 1];
+    var recLast = last.recettes_fonctionnement;
+    var depLast = last.depenses_fonctionnement;
+    var detteLast = last.dette;
+    var epargneLast = last.epargne_brute;
+    var investLast = last.investissement;
+    
+    var evolRec = (first.recettes_fonctionnement && recLast) ? ((recLast / first.recettes_fonctionnement - 1) * 100) : null;
+    var evolDep = (first.depenses_fonctionnement && depLast) ? ((depLast / first.depenses_fonctionnement - 1) * 100) : null;
+    var evolDette = (first.dette && detteLast) ? ((detteLast / first.dette - 1) * 100) : null;
+    var tauxEndettement = (detteLast && recLast) ? (detteLast / recLast * 100) : null;
+    var tauxEpargne = (epargneLast && recLast) ? (epargneLast / recLast * 100) : null;
+    var partPersonnel = (last.personnel && depLast) ? (last.personnel / depLast * 100) : null;
+    var recParHab = (recLast && last.population) ? (recLast / last.population) : null;
+    var detteParHab = (detteLast && last.population) ? (detteLast / last.population) : null;
+    var periode = first.annee + '-' + last.annee;
+    
+    var diag1 = (tauxEndettement !== null && tauxEndettement > 100) ? '⚠️ Endettement élevé<br>' : '✅ Endettement maîtrisé<br>';
+    var diag2 = (tauxEpargne !== null && tauxEpargne > 15) ? '✅ Bonne épargne<br>' : (tauxEpargne !== null ? '⚠️ Épargne limitée<br>' : '');
+    var diag3 = (evolRec !== null && evolDep !== null && evolRec > evolDep) ? '✅ Recettes > dépenses' : (evolRec !== null && evolDep !== null ? '⚠️ Dépenses > recettes' : '');
+    
+    grid.innerHTML =
+        '<div class="insight-item"><h4>📈 Recettes</h4>' +
+        '<p>Entre ' + periode + ' : <span class="highlight">' + (evolRec !== null ? (evolRec > 0 ? '+' : '') + formatNumber(evolRec, 1) + '%' : 'N/D') + '</span><br>' +
+        'Recettes ' + last.annee + ' : <span class="highlight">' + formatMEuro(recLast) + '</span><br>' +
+        'Soit <span class="highlight">' + formatEuro(recParHab, 0) + '/hab</span></p></div>' +
+        '<div class="insight-item"><h4>📉 Dépenses</h4>' +
+        '<p>Entre ' + periode + ' : <span class="highlight">' + (evolDep !== null ? (evolDep > 0 ? '+' : '') + formatNumber(evolDep, 1) + '%' : 'N/D') + '</span><br>' +
+        'Dépenses ' + last.annee + ' : <span class="highlight">' + formatMEuro(depLast) + '</span><br>' +
+        'Personnel : <span class="highlight">' + (partPersonnel !== null ? formatNumber(partPersonnel, 1) + '%' : 'N/D') + '</span></p></div>' +
+        '<div class="insight-item rouge"><h4>💰 Endettement</h4>' +
+        '<p>Dette ' + last.annee + ' : <span class="highlight">' + formatMEuro(detteLast) + '</span><br>' +
+        'Évolution : <span class="highlight">' + (evolDette !== null ? (evolDette > 0 ? '+' : '') + formatNumber(evolDette, 1) + '%' : 'N/D') + '</span><br>' +
+        'Taux : <span class="highlight">' + (tauxEndettement !== null ? formatNumber(tauxEndettement, 1) + '%' : 'N/D') + '</span></p></div>' +
+        '<div class="insight-item rouge"><h4>💵 Épargne / Investissement</h4>' +
+        '<p>Épargne brute : <span class="highlight">' + formatMEuro(epargneLast) + '</span><br>' +
+        'Taux épargne : <span class="highlight">' + (tauxEpargne !== null ? formatNumber(tauxEpargne, 1) + '%' : 'N/D') + '</span><br>' +
+        'Investissement : <span class="highlight">' + formatMEuro(investLast) + '</span></p></div>' +
+        '<div class="insight-item"><h4>👥 Par habitant</h4>' +
+        '<p>Recettes/hab : <span class="highlight">' + formatEuro(recParHab, 0) + '</span><br>' +
+        'Dette/hab : <span class="highlight">' + formatEuro(detteParHab, 0) + '</span><br>' +
+        'Population : <span class="highlight">' + formatNumber(last.population) + '</span></p></div>' +
+        '<div class="insight-item rouge"><h4>📋 Diagnostic</h4>' +
+        '<p>' + diag1 + diag2 + diag3 + '</p></div>';
+}
+
+function renderTable(commune) {
+    var tbody = document.getElementById('dataTableBody');
+    tbody.innerHTML = '';
+    commune.donnees.forEach(function(d) {
+        var row = document.createElement('tr');
+        row.innerHTML =
+            '<td><strong>' + d.annee + '</strong></td>' +
+            '<td>' + formatNumber(d.population) + '</td>' +
+            '<td>' + formatMEuro(d.recettes_fonctionnement) + '</td>' +
+            '<td>' + formatMEuro(d.depenses_fonctionnement) + '</td>' +
+            '<td>' + formatMEuro(d.epargne_brute) + '</td>' +
+            '<td>' + formatMEuro(d.investissement) + '</td>' +
+            '<td>' + formatMEuro(d.dette) + '</td>';
+        tbody.appendChild(row);
+    });
+}
+
+// ============================================================
+// RADAR COMPARATIF
+// ============================================================
+function renderRadarSelector() {
+    var container = document.getElementById('radarSelector');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    Object.keys(DATA.communes).forEach(function(code) {
+        var commune = DATA.communes[code];
+        var selected = radarSelection.indexOf(code) !== -1;
+        var disabled = !selected && radarSelection.length >= 3;
+        
+        var label = document.createElement('label');
+        label.className = 'commune-check' + (selected ? ' selected' : '') + (disabled ? ' disabled' : '');
+        
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = selected;
+        cb.disabled = disabled;
+        cb.addEventListener('change', function() {
+            if (cb.checked) {
+                if (radarSelection.length < 3) radarSelection.push(code);
+            } else {
+                radarSelection = radarSelection.filter(function(c) { return c !== code; });
+            }
+            renderRadarSelector();
+        });
+        
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(' ' + commune.nom));
+        container.appendChild(label);
+    });
+    
+    renderRadarChart();
+}
+
+function renderRadarChart() {
+    if (charts.radar) charts.radar.destroy();
+    var canvas = document.getElementById('chartRadar');
+    if (!canvas || radarSelection.length < 2) return;
+    
+    var indicators = ['recettes_fonctionnement', 'depenses_fonctionnement', 'dette', 'epargne_brute', 'investissement', 'personnel'];
+    var labels = ['Recettes', 'Dépenses', 'Dette', 'Épargne', 'Investissement', 'Personnel'];
+    
+    var maxValues = {};
+    indicators.forEach(function(ind) {
+        var max = 0;
+        Object.keys(DATA.communes).forEach(function(code) {
+            var last = getLastYearData(DATA.communes[code]);
+            if (last && last[ind] > max) max = last[ind];
+        });
+        maxValues[ind] = max || 1;
+    });
+    
+    var datasets = radarSelection.map(function(code, i) {
+        var commune = DATA.communes[code];
+        var last = getLastYearData(commune);
+        var color = RADAR_COLORS[i % RADAR_COLORS.length];
+        return {
+            label: commune.nom,
+            data: indicators.map(function(ind) {
+                var val = (last && last[ind]) ? last[ind] : 0;
+                return Math.round((val / maxValues[ind]) * 100);
+            }),
+            borderColor: color.border, backgroundColor: color.bg,
+            pointBackgroundColor: color.border, pointBorderColor: '#FFF',
+            pointRadius: 5, borderWidth: 2.5
+        };
+    });
+    
+    charts.radar = new Chart(canvas, {
+        type: 'radar',
+        data: { labels: labels, datasets: datasets },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', labels: { usePointStyle: true, padding: 20, font: { size: 12 } } },
+                tooltip: { callbacks: { label: function(ctx) {
+                    var code = radarSelection[ctx.datasetIndex];
+                    var last = getLastYearData(DATA.communes[code]);
+                    return ctx.dataset.label + ' : ' + formatMEuro(last[indicators[ctx.dataIndex]]);
+                } } }
+            },
+            scales: {
+                r: { beginAtZero: true, max: 100, ticks: { display: false },
+                    grid: { color: 'rgba(0,85,164,.1)' }, angleLines: { color: 'rgba(0,85,164,.1)' },
+                    pointLabels: { font: { size: 12, weight: '600' }, color: '#0055A4' } }
+            }
+        }
+    });
+}
+
+// ============================================================
+// CARTE HEATMAP
+// ============================================================
+function getCommuneValue(code, indicator) {
+    var commune = DATA.communes[code];
+    if (!commune) return null;
+    var last = getLastYearData(commune);
+    if (!last) return null;
+    
+    if (indicator === 'recettes_par_hab') return (last.recettes_fonctionnement && last.population) ? last.recettes_fonctionnement / last.population : null;
+    if (indicator === 'dette_par_hab') return (last.dette && last.population) ? last.dette / last.population : null;
+    if (indicator === 'taux_endettement') return (last.dette && last.recettes_fonctionnement) ? (last.dette / last.recettes_fonctionnement * 100) : null;
+    return last[indicator] || null;
+}
+
+function getHeatmapColor(value, min, max) {
+    if (value === null) return '#E5E7EB';
+    if (max === min) return HEATMAP_COLORS[0];
+    var ratio = (value - min) / (max - min);
+    var idx = Math.min(HEATMAP_COLORS.length - 1, Math.floor(ratio * HEATMAP_COLORS.length));
+    return HEATMAP_COLORS[idx];
+}
+
+function formatMapValue(value, indicator) {
+    if (value === null) return 'N/D';
+    if (indicator === 'taux_endettement') return formatNumber(value, 1) + ' %';
+    if (indicator === 'recettes_par_hab' || indicator === 'dette_par_hab') return formatEuro(value, 0) + '/hab';
+    return formatMEuro(value);
+}
+
+function renderMap() {
+    var indicatorEl = document.getElementById('mapIndicator');
+    if (!indicatorEl) return;
+    var indicator = indicatorEl.value;
+    var svg = document.getElementById('mapSvg');
+    if (!svg) return;
+    svg.innerHTML = '';
+    
+    var values = [];
+    Object.keys(COMMUNE_POSITIONS).forEach(function(code) {
+        var v = getCommuneValue(code, indicator);
+        if (v !== null && v !== undefined) values.push(v);
+    });
+    var min = Math.min.apply(null, values);
+    var max = Math.max.apply(null, values);
+    
+    var bg = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    bg.setAttribute('cx', '48'); bg.setAttribute('cy', '40');
+    bg.setAttribute('rx', '42'); bg.setAttribute('ry', '38');
+    bg.setAttribute('fill', '#F0F6FF'); bg.setAttribute('stroke', '#B8D4EC');
+    bg.setAttribute('stroke-width', '0.5');
+    svg.appendChild(bg);
+    
+    Object.keys(COMMUNE_POSITIONS).forEach(function(code) {
+        var pos = COMMUNE_POSITIONS[code];
+        var value = getCommuneValue(code, indicator);
+        var color = getHeatmapColor(value, min, max);
+        
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos.x); circle.setAttribute('cy', pos.y); circle.setAttribute('r', '4');
+        circle.setAttribute('fill', color); circle.setAttribute('class', 'commune-shape');
+        circle.setAttribute('data-code', code); circle.setAttribute('data-name', pos.name);
+        circle.setAttribute('data-value', value || ''); circle.setAttribute('data-indicator', indicator);
+        circle.addEventListener('mouseenter', showMapTooltip);
+        circle.addEventListener('mousemove', moveMapTooltip);
+        circle.addEventListener('mouseleave', hideMapTooltip);
+        circle.addEventListener('click', function() {
+            switchTab('accueil');
+            selectCommune(code);
+        });
+        svg.appendChild(circle);
+        
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos.x); text.setAttribute('y', pos.y + 8);
+        text.setAttribute('text-anchor', 'middle'); text.setAttribute('font-size', '2');
+        text.setAttribute('fill', '#1F2937'); text.setAttribute('pointer-events', 'none');
+        text.textContent = pos.name.substring(0, 12);
+        svg.appendChild(text);
+    });
+    
+    var legend = document.getElementById('legendScale');
+    if (legend) {
+        legend.innerHTML = '';
+        HEATMAP_COLORS.forEach(function(c) {
+            var span = document.createElement('span');
+            span.style.background = c;
+            legend.appendChild(span);
+        });
+    }
+}
+
+function showMapTooltip(e) {
+    var tooltip = document.getElementById('mapTooltip');
+    if (!tooltip) return;
+    var name = e.target.getAttribute('data-name');
+    var value = e.target.getAttribute('data-value');
+    var indicator = e.target.getAttribute('data-indicator');
+    var parsedValue = value ? parseFloat(value) : null;
+    tooltip.innerHTML = '<strong>' + name + '</strong><br>' + formatMapValue(parsedValue, indicator);
+    tooltip.classList.add('visible');
+}
+function moveMapTooltip(e) {
+    var tooltip = document.getElementById('mapTooltip');
+    var container = document.getElementById('mapContainer');
+    if (!tooltip || !container) return;
+    var rect = container.getBoundingClientRect();
+    tooltip.style.left = (e.clientX - rect.left + 15) + 'px';
+    tooltip.style.top = (e.clientY - rect.top - 20) + 'px';
+}
+function hideMapTooltip() {
+    var tooltip = document.getElementById('mapTooltip');
+    if (tooltip) tooltip.classList.remove('visible');
+}
+
+// ============================================================
+// TABLEAU COMPARATIF
+// ============================================================
+function renderComparisonTable() {
+    var tbody = document.getElementById('comparisonTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    var rows = [];
+    Object.keys(DATA.communes).forEach(function(code) {
+        var commune = DATA.communes[code];
+        var last = getLastYearData(commune);
+        if (!last) return;
+        var recParHab = (last.recettes_fonctionnement && last.population) ? last.recettes_fonctionnement / last.population : null;
+        var detteParHab = (last.dette && last.population) ? last.dette / last.population : null;
+        var tauxEndet = (last.dette && last.recettes_fonctionnement) ? (last.dette / last.recettes_fonctionnement * 100) : null;
+        rows.push({
+            code: code, nom: commune.nom, population: last.population,
+            recettes: last.recettes_fonctionnement, depenses: last.depenses_fonctionnement,
+            dette: last.dette, epargne: last.epargne_brute, investissement: last.investissement,
+            recettes_hab: recParHab, dette_hab: detteParHab, taux_endettement: tauxEndet
+        });
+    });
+    
+    rows.sort(function(a, b) {
+        var va = a[sortColumn], vb = b[sortColumn];
+        if (va === null || va === undefined) return 1;
+        if (vb === null || vb === undefined) return -1;
+        if (typeof va === 'string') return sortDirection === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+        return sortDirection === 'asc' ? va - vb : vb - va;
+    });
+    
+    rows.forEach(function(row, i) {
+        var tr = document.createElement('tr');
+        if (i === 0) tr.className = 'top1';
+        else if (i === 1) tr.className = 'top2';
+        else if (i === 2) tr.className = 'top3';
+        tr.innerHTML =
+            '<td><strong>' + row.nom + '</strong></td>' +
+            '<td>' + formatNumber(row.population) + '</td>' +
+            '<td>' + formatMEuro(row.recettes) + '</td>' +
+            '<td>' + formatMEuro(row.depenses) + '</td>' +
+            '<td>' + formatMEuro(row.dette) + '</td>' +
+            '<td>' + formatMEuro(row.epargne) + '</td>' +
+            '<td>' + formatMEuro(row.investissement) + '</td>' +
+            '<td>' + formatEuro(row.recettes_hab, 0) + '</td>' +
+            '<td>' + formatEuro(row.dette_hab, 0) + '</td>' +
+            '<td>' + (row.taux_endettement !== null ? formatNumber(row.taux_endettement, 1) + ' %' : 'N/D') + '</td>';
+        tr.style.cursor = 'pointer';
+        tr.addEventListener('click', function() {
+            switchTab('accueil');
+            selectCommune(row.code);
+        });
+        tbody.appendChild(tr);
+    });
+    
+    document.querySelectorAll('#comparisonTable th.sortable').forEach(function(th) {
+        th.classList.remove('sort-asc', 'sort-desc');
+        if (th.getAttribute('data-sort') === sortColumn) {
+            th.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+        }
+        th.onclick = function() {
+            var col = th.getAttribute('data-sort');
+            if (col === sortColumn) sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            else { sortColumn = col; sortDirection = 'desc'; }
+            renderComparisonTable();
+        };
+    });
+}
+
+// ============================================================
+// EXPORT CSV
+// ============================================================
+function exportCSV() {
+    var rows = [];
+    rows.push(['Commune', 'Population', 'Recettes (M€)', 'Dépenses (M€)', 'Dette (M€)', 'Épargne brute (M€)', 'Investissement (M€)', 'Recettes/hab (€)', 'Dette/hab (€)', 'Taux endettement (%)']);
+    
+    Object.keys(DATA.communes).forEach(function(code) {
+        var commune = DATA.communes[code];
+        var last = getLastYearData(commune);
+        if (!last) return;
+        var recParHab = (last.recettes_fonctionnement && last.population) ? (last.recettes_fonctionnement / last.population).toFixed(0) : '';
+        var detteParHab = (last.dette && last.population) ? (last.dette / last.population).toFixed(0) : '';
+        var tauxEndet = (last.dette && last.recettes_fonctionnement) ? (last.dette / last.recettes_fonctionnement * 100).toFixed(1) : '';
+        rows.push([
+            commune.nom, last.population || '',
+            last.recettes_fonctionnement ? (last.recettes_fonctionnement / 1e6).toFixed(2) : '',
+            last.depenses_fonctionnement ? (last.depenses_fonctionnement / 1e6).toFixed(2) : '',
+            last.dette ? (last.dette / 1e6).toFixed(2) : '',
+            last.epargne_brute ? (last.epargne_brute / 1e6).toFixed(2) : '',
+            last.investissement ? (last.investissement / 1e6).toFixed(2) : '',
+            recParHab, detteParHab, tauxEndet
+        ]);
+    });
+    
+    var csv = rows.map(function(row) {
+        return row.map(function(cell) {
+            var s = String(cell === null || cell === undefined ? '' : cell);
+            if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1) {
+                return '"' + s.replace(/"/g, '""') + '"';
+            }
+            return s;
+        }).join(';');
+    }).join('\n');
+    
+    var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    var link = document.createElement('a');
+    var url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'comparaison_communes_reunion_2025.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// ============================================================
+// INITIALISATION
+// ============================================================
+loadData();
+</script>
+</body>
+</html>
